@@ -1,7 +1,7 @@
 node {
 	stage("Clone repository") {
         checkout scm
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'github-token', sh 'git submodule update --init'
+        sh 'git submodule update --init'
     }
 	stage("Ubuntu 18.04") {
 		sh './ubuntu-1804/build.sh'
@@ -9,12 +9,13 @@ node {
 }
 def parallelBuilds = [:]
 def directories = ["jenkins-master", "jenkins-slave", "rails-base"]
-directories.each { directory -> 
+directories.each { directory ->
 	parallelBuilds[directory] = {
 			node {
 				stage("Clone repository") {
-		        checkout scm
-		        sh 'git submodule update --init'
+		        	checkout scm
+			        sh 'git submodule update --init'
+			}
 		    }
 			stage(directory) {
 				sh "./" + directory + "/build.sh"
