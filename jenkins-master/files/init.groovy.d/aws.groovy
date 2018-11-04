@@ -75,6 +75,11 @@ def jenkins = Jenkins.getInstance()
 
 def masterCredentials = getJenkinsMasterCredentials(client);
 
+// Set location
+jlc = JenkinsLocationConfiguration.get()
+jlc.setUrl(masterCredentials.jenkins_url)
+jlc.save()
+
 // Setup user
 if (createUser(jenkins, masterCredentials.admin_username, masterCredentials.admin_password)) {
   println("Created admin user!")

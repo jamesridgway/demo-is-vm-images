@@ -84,10 +84,6 @@ if(!jenkins.getAgentProtocols().equals(agentProtocolsList)) {
 jenkins.injector.getInstance(AdminWhitelistRule.class).setMasterKillSwitch(false);
 jenkins.save()
 
-// Set location
-jlc = JenkinsLocationConfiguration.get()
-//jlc.setUrl("https://jenkins") 
-jlc.save() 
 
 // Install Plugins
 def installed = installPlugins(jenkins, plugins)
