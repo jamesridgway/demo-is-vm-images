@@ -1,0 +1,48 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "eu-west-1",
+      "instance_type": "t3.nano",
+      "ssh_username": "ubuntu",
+      "source_ami_filter": {
+        "filters": {
+          "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"
+        },
+        "most_recent": true,
+        "owners": ["099720109477"]
+      },
+      "ami_name": "ubuntu-1804 {{timestamp}}",
+      "associate_public_ip_address": true,
+      "tags": {
+        "Name": "Ubuntu 18.04",
+        "Project": "Core",
+        "Commit": "unknown"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "../salt/salt",
+      "destination": "~/salt"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/init.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "output": "builds/{{.Provider}}-ubuntu1804.box",
+        "type": "vagrant"
+      }
+    ]
+  ]
+}

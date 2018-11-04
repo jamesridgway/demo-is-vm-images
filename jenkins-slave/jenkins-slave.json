@@ -1,0 +1,40 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "eu-west-1",
+      "instance_type": "t3.nano",
+      "ssh_username": "ubuntu",
+      "ami_name": "jenkins-slave {{timestamp}}",
+      "source_ami_filter": {
+        "filters": {
+          "name": "ubuntu-1804*"
+        },
+        "owners": ["945890096970"],
+        "most_recent": true
+      },
+      "associate_public_ip_address": true,
+      "tags": {
+        "Name": "Jenkins Slave",
+        "Project": "Core",
+        "Commit": "unknown"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "../salt/salt",
+      "destination": "~/salt"
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/init.sh"
+      ]
+    }
+  ]
+}
