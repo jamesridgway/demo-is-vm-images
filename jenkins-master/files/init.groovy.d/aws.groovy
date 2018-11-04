@@ -12,9 +12,13 @@ import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
 import com.amazonaws.services.ec2.model.DescribeImagesRequest
 import com.amazonaws.services.ec2.model.DescribeImagesResult
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
 import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.InstanceType
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
+import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder
 import com.amazonaws.services.secretsmanager.model.*
@@ -97,21 +101,41 @@ hostname -F /etc/hostname
 echo -n "\${HOSTNAME}" > /etc/salt/minion_id'
 """
 
-AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient()
 DescribeImagesResult describeImagesResult = ec2.describeImages(new DescribeImagesRequest()
   .withFilters(new Filter("name").withValues("jenkins-slave*"))
-  .withOwners("self"));
+  .withOwners("self"))
 
 Image jenkinsSlaveAmi = describeImagesResult.getImages().stream()
   .sorted { i1, i2 -> i2.getCreationDate().compareTo(i1.getCreationDate())}
   .findFirst()
-  .get();
+  .get()
+
+
+String sshSgName = ec2.describeSecurityGroups(new DescribeSecurityGroupsRequest()
+    .withFilters(new Filter("tag:Name").withValues("SSH")))
+    .getSecurityGroups().get(0)
+    .getGroupId()
+
+String defaultSgName = ec2.describeSecurityGroups(new DescribeSecurityGroupsRequest()
+    .withFilters(new Filter("description").withValues("default VPC security group")))
+    .getSecurityGroups().get(0)
+    .getGroupId()
+
+AmazonIdentityManagement iam = AmazonIdentityManagementClient.builder().build();
+
+String jenkinsCiSlaveInstanceProfile = iam.getInstanceProfile(new GetInstanceProfileRequest()
+    .withInstanceProfileName("jenkins_ci_slave"))
+    .getInstanceProfile()
+    .getArn()
+
+String subnetId = ec2.describeSubnets().getSubnets().get(0).getSubnetId()
 
 def workerAmi = new SlaveTemplate(
   jenkinsSlaveAmi.getImageId(),                                   // String ami
   '',                                                             // String zone
   new SpotConfiguration("0.02"),                                  // SpotConfiguration spotConfig
-  "sg-f4352096,sg-03f1cf776a0a8e86d",                             // String securityGroups
+  defaultSgName + "," + sshSgName,                                // String securityGroups
   '/home/jenkins',                                                // String remoteFS
   InstanceType.fromValue("t3.small"),                             // InstanceType type
   false,                                                          // boolean ebsOptimized
@@ -123,15 +147,15 @@ def workerAmi = new SlaveTemplate(
   slaveUserData,                                                  // String userData
   "1",                                                            // String numExecutors
   'jenkins',                                                      // String remoteAdmin
-  new UnixData(null, null, null, '5743'),                         // AMITypeData amiType
+  new UnixData(null, null, null, '22'),                           // AMITypeData amiType
   '',                                                             // String jvmopts
   false,                                                          // boolean stopOnTerminate
-  "subnet-ffb1b89d",                                              // String subnetId
+  subnetId,                                                       // String subnetId
   ec2_tags,                                                       // List<EC2Tag> tags
   '30',                                                           // String idleTerminationMinutes
   false,                                                          // boolean usePrivateDnsName
   '4',                                                            // String instanceCapStr
-  "arn:aws:iam::945890096970:instance-profile/jenkins_ci_slave",  // String iamInstanceProfile
+  jenkinsCiSlaveInstanceProfile,                                  // String iamInstanceProfile
   false,                                                          // boolean deleteRootOnTermination
   true,                                                           // boolean useEphemeralDevices
   false,                                                          // boolean useDedicatedTenancy
