@@ -8,8 +8,3 @@ HOSTNAME="jenkins-${INSTANCE_ID}"
 # Hostname
 echo -n "${HOSTNAME}" > /etc/hostname
 hostname -F /etc/hostname
-
-# Salt
-echo -n "${HOSTNAME}" > /etc/salt/minion_id
-sed -i -e 's/#master:.*/master: core/g' /etc/salt/minion
-systemctl restart salt-minion

@@ -95,8 +95,6 @@ HOSTNAME="jenkins-slave-\${INSTANCE_ID}"
 echo -n "\${HOSTNAME}" > /etc/hostname
 hostname -F /etc/hostname
 echo -n "\${HOSTNAME}" > /etc/salt/minion_id'
-sed -i -e 's/#master:.*/master: core/g' /etc/salt/minion
-systemctl restart salt-minion
 """
 
 AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();

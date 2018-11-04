@@ -4,6 +4,7 @@
       "type": "amazon-ebs",
       "access_key": "{{user `aws_access_key`}}",
       "secret_key": "{{user `aws_secret_key`}}",
+      "profile": "demo",
       "region": "eu-west-1",
       "instance_type": "t3.nano",
       "ssh_username": "ubuntu",
@@ -26,7 +27,7 @@
   "provisioners": [
     {
       "type": "file",
-      "source": "../salt/salt",
+      "source": "../demo-salt/salt",
       "destination": "~/salt"
     },
     {
