@@ -8,7 +8,7 @@ DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -yq
 
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
-apt-get install -y build-essential patch ruby-dev zlib1g-dev liblzma-dev libmysqlclient-dev nodejs wget imagemagick
+apt-get install -y build-essential patch ruby-dev zlib1g-dev liblzma-dev libmysqlclient-dev nodejs wget imagemagick libsqlite3-dev
 apt-get autoremove -y
 
 gem install bundler
@@ -30,7 +30,7 @@ systemctl restart salt-minion
 salt-call --local state.apply
 
 # Clean up salt
-rm -rf "/home/$SUDO_USER/salt" /srv/salt "/home/$SUDO_USER/pillar" /srv/pillar 
+rm -rf "/home/$SUDO_USER/salt" /srv/salt "/home/$SUDO_USER/pillar" /srv/pillar
 sed -i -e '/^file_client:/ d' /etc/salt/minion
 
 # Chomedriver
