@@ -20,7 +20,7 @@
       "tags": {
         "Name": "Ubuntu 18.04",
         "Project": "Core",
-        "Commit": "unknown"
+        "Commit": "{{user `commit`}}"
       }
     }
   ],
@@ -37,13 +37,5 @@
         "scripts/init.sh"
       ]
     }
-  ],
-  "post-processors": [
-    [
-      {
-        "output": "builds/{{.Provider}}-ubuntu1804.box",
-        "type": "vagrant"
-      }
-    ]
   ]
 }

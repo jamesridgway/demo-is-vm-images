@@ -20,7 +20,7 @@
       "tags": {
         "Name": "Rails Base",
         "Project": "Core",
-        "Commit": "unknown"
+        "Commit": "{{user `commit`}}"
       }
     }
   ],

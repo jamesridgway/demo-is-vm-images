@@ -20,7 +20,7 @@
       "tags": {
         "Name": "Jenkins Slave",
         "Project": "Core",
-        "Commit": "unknown"
+        "Commit": "{{user `commit`}}"
       }
     }
   ],
