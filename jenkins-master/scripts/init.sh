@@ -30,10 +30,7 @@ rm -rf "/home/$SUDO_USER/salt" /srv/salt "/home/$SUDO_USER/pillar" /srv/pillar
 sed -i -e '/^file_client:/ d' /etc/salt/minion
 
 # Java
-add-apt-repository ppa:webupd8team/java
-apt-get update
-echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | debconf-set-selections
-apt-get install -y oracle-java8-installer oracle-java8-unlimited-jce-policy
+apt-get install -y openjdk-8-jdk-headless
 
 # Jenkins
 wget -q -O - https://pkg.jenkins.io/debian/jenkins-ci.org.key | apt-key add -
